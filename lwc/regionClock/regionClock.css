@@ -1,0 +1,6 @@
+.clock-time {
+    font-size: 2.5rem;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
