@@ -1,14 +1,6 @@
 <template>
     <lightning-card title="Region Clock" icon-name="standard:event">
         <div class="slds-p-horizontal_medium">
-            <lightning-combobox
-                name="timeZone"
-                label="Time Zone"
-                value={timeZone}
-                options={options}
-                onchange={handleTimeZoneChange}
-            ></lightning-combobox>
-
             <div class="slds-text-align_center slds-p-vertical_medium">
                 <div class="clock-time">{formattedTime}</div>
                 <div class="slds-text-title_caps">{timeZoneAbbreviation}</div>
@@ -23,6 +15,28 @@
             <template lwc:if={errorMessage}>
                 <p class="slds-text-color_error slds-p-bottom_small">{errorMessage}</p>
             </template>
+
+            <fieldset class="slds-form-element">
+                <legend class="slds-form-element__legend slds-form-element__label">Region</legend>
+                <div class="slds-form-element__control radio-row">
+                    <template for:each={options} for:item="option">
+                        <span key={option.value} class="slds-radio">
+                            <input
+                                type="radio"
+                                id={option.id}
+                                name="timeZone"
+                                value={option.value}
+                                checked={option.checked}
+                                onchange={handleTimeZoneChange}
+                            />
+                            <label class="slds-radio__label" for={option.id}>
+                                <span class="slds-radio_faux"></span>
+                                <span class="slds-form-element__label">{option.label}</span>
+                            </label>
+                        </span>
+                    </template>
+                </div>
+            </fieldset>
         </div>
     </lightning-card>
 </template>

@@ -4,12 +4,18 @@ import getTimeZoneForRecord from '@salesforce/apex/RegionTimeZoneController.getT
 const DEFAULT_TIME_ZONE = 'America/New_York';
 
 const TIME_ZONE_OPTIONS = [
-    { label: 'Eastern Time (EST/EDT)', value: 'America/New_York' },
-    { label: 'Central Time (CST/CDT)', value: 'America/Chicago' },
-    { label: 'Mountain Time (MST/MDT)', value: 'America/Denver' },
-    { label: 'UAE - Gulf Standard Time (GST)', value: 'Asia/Dubai' },
-    { label: 'Saudi Arabia - Arabia Standard Time (AST)', value: 'Asia/Riyadh' }
+    { label: 'Appalachia', value: 'America/New_York' },
+    { label: 'TX/Bakken', value: 'America/Chicago' },
+    { label: 'Rockies', value: 'America/Denver' },
+    { label: 'UAE', value: 'Asia/Dubai' },
+    { label: 'KSA', value: 'Asia/Riyadh' }
 ];
+
+// Intl has no short names for these zones and renders "GMT+4"/"GMT+3" instead.
+const ABBREVIATION_OVERRIDES = {
+    'Asia/Dubai': 'GST',
+    'Asia/Riyadh': 'AST'
+};
 
 export default class RegionClock extends LightningElement {
     @api recordId;
@@ -21,7 +27,13 @@ export default class RegionClock extends LightningElement {
     errorMessage;
     timer;
 
-    options = TIME_ZONE_OPTIONS;
+    get options() {
+        return TIME_ZONE_OPTIONS.map((option) => ({
+            ...option,
+            id: `tz-${option.value}`,
+            checked: option.value === this.timeZone
+        }));
+    }
 
     @wire(getTimeZoneForRecord, { recordId: '$recordId' })
     wiredTimeZone({ data, error }) {
@@ -48,15 +60,14 @@ export default class RegionClock extends LightningElement {
 
     handleTimeZoneChange(event) {
         this.userSelected = true;
-        this.timeZone = event.detail.value;
+        this.timeZone = event.target.value;
     }
 
     get formattedTime() {
         return new Intl.DateTimeFormat('en-US', {
             timeZone: this.timeZone,
             hour: 'numeric',
-            minute: '2-digit',
-            second: '2-digit'
+            minute: '2-digit'
         }).format(this.now);
     }
 
@@ -71,6 +82,9 @@ export default class RegionClock extends LightningElement {
     }
 
     get timeZoneAbbreviation() {
+        if (ABBREVIATION_OVERRIDES[this.timeZone]) {
+            return ABBREVIATION_OVERRIDES[this.timeZone];
+        }
         const part = new Intl.DateTimeFormat('en-US', {
             timeZone: this.timeZone,
             timeZoneName: 'short'
